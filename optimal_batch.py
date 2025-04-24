@@ -1,11 +1,22 @@
 import math
+import argparse
 import numpy as np
 from scipy.optimize import minimize
 
 # python code to calculate what the optimal points to flip are
 
+parser = argparse.ArgumentParser(
+                    prog='Optimal Strategy Calculator',
+                    description='Uses numerical optimization to find the optimal strategy',
+                    epilog=':)')
 
-EPS = 0.1
+parser.add_argument('-e', "--epsilon")
+parser.add_argument('-p', "--procs")
+
+args = parser.parse_args()
+
+EPS = float(args.epsilon)
+procs = int(args.procs)
 
 # binary entropy (with logits instead of bits) of p biased coin
 def H(p):
@@ -60,10 +71,10 @@ def quantiles_to_entropy(quantiles):
     return ent1 + ent2 + entropy
 
 
-n = 7
+n = procs
 
 # Initial guess: already increasing
-initial_guess = np.array([.1,.2,.4,.5,.6,.8,.9])
+initial_guess = np.array([ (i+1)/(procs+1) for i in range(procs)])
 
 # Constraints: x[i+1] - x[i] > 0 (strictly increasing)
 constraints = []
@@ -78,6 +89,8 @@ result = minimize(lambda x: -wrapper(x), initial_guess, constraints=constraints)
 # Results
 x_max = result.x 
 f_max = wrapper(x_max) - n * H(.5 + EPS)
+
+print([float(x) for x in list(x_max)])
 
 print(f"Maximum occurs at x = {x_max}")
 print(f"Maximum value = {f_max}")
