@@ -1,14 +1,14 @@
 #include "RBS.h"
 #include <bits/stdc++.h>
 
+mt19937 generator = mt19937(time(NULL)); // TODO make this random seeded
+
 struct StandardInstance : public Problem {
-	mt19937 generator; // TODO make this random seeded
 	uniform_real_distribution<double> distribution = uniform_real_distribution<double>(0,1);
 	int N;
 	int _answer;
 	double eps;
 	StandardInstance(int N, int _answer, double eps) : N(N), _answer(_answer), eps(eps){
-		generator = mt19937(time(NULL));
 	}
 
 	int f(F x) override {
@@ -28,7 +28,7 @@ struct StandardInstance : public Problem {
 };
 
 int main(){
-	int digits = 60;
+	int digits = 128;
 	mpfr::mpreal::set_default_prec(mpfr::digits2bits(digits));
 
 	//vector<Selector*> selectors = {new MedianSelector(), new RandomSelector(), new QSelector()};
@@ -38,8 +38,8 @@ int main(){
 	double eps = .1;
 	//const F PROBLEM_SIZE = mpfr::mpreal(1e10);
 	const int PROBLEM_SIZE = 100000; 
-	const int M = 1;
-	int exp_iterations = int(mpfr::log(PROBLEM_SIZE)/(2*eps*eps));
+	const int M = 100;
+	int exp_iterations = int(mpfr::log(PROBLEM_SIZE)/(1.9*eps*eps));
 
 	cout << exp_iterations << '\n';
 
@@ -48,6 +48,7 @@ int main(){
 	for(int i = exp_iterations;i <= exp_iterations; ++i){
 		vector<F> v_correct;
 
+        //vector<F> pivots = {mpfr::mpreal(.4), mpfr::mpreal(.5), mpfr::mpreal(.6)};
         vector<F> pivots = {mpfr::mpreal(.5)};
 
         F correct = 0;
@@ -55,24 +56,15 @@ int main(){
             //F answer = mpfr::mpreal(floor(distribution(generator)));
             int answer = PROBLEM_SIZE/2; 
             auto instance = StandardInstance(PROBLEM_SIZE, answer, eps); 
-            int res = solver.solve(instance,pivots,answerer,eps,i);
+            int res = solver.solve(instance, pivots, answerer, eps, i);
             
-            /*
-            if(mpfr::floor(res) == answer){
+
+            cout << res << ' ' << answer << endl;
+            if(res == answer){
                 ++correct;
             }
-            */
-
-            correct += res; 
-        
         }
-        v_correct.push_back(correct);
-		
-		cout << i;
-		for(F x:v_correct){
-			cout << ' ' << x/M; 
-		}
-		//cout << '\n';
-		cout << endl;
+
+        cout << "Percent correct: " << correct/M << '\n';
 	}
 }
