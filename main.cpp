@@ -10,7 +10,8 @@ int main(){
 
 	//vector<Selector*> selectors = {new MedianSelector(), new RandomSelector(), new QSelector()};
 	MedianAnswerer answerer = MedianAnswerer();
-	Solver solver = Solver();	
+	//Solver solver = Solver();	
+	AdaptiveSolver solver = AdaptiveSolver();	
 
     vector<vector<F>> strategies;
 
@@ -27,7 +28,7 @@ int main(){
 	double eps = .1;
 	//const F PROBLEM_SIZE = mpfr::mpreal(1e10);
 	const int PROBLEM_SIZE = 1000000; 
-	const int M = 1;
+	const int M = 16;
 	int exp_iterations = int(mpfr::log(PROBLEM_SIZE)/(procs*eps*eps));
 
 	cout << exp_iterations << '\n';

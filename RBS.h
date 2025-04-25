@@ -181,7 +181,7 @@ struct MedianAnswerer : public Answerer {
 	}
 };
 
-struct Solver{
+struct Solver {
     int solve(Problem & problem, vector<F> pivots, const Answerer &answerer, F eps, int iterations){
 
 		int upper_bound = problem.range().second;
@@ -238,6 +238,121 @@ struct Solver{
 
 			if(mpfr::abs(tree->query(0, upper_bound) - mpfr::mpreal(1)) > .1){
 				printf("BADBADBBADBADBAD\n");
+                exit(0);
+			}
+
+		}
+	
+		int ans = answerer.answer(pivots, tree, problem);
+
+		delete tree;
+
+		return ans;
+	}
+};
+
+bool adaptive_flip(const F p0, const F p1, const F alpha, const F beta, Problem & problem, int x, F &emp_bias) {
+    F A = (1 - beta) / alpha;
+    F B = beta / (1 - alpha);
+    F logA = mpfr::log(A);
+    F logB = mpfr::log(B);
+
+    F logLikelihood = 0.0;
+    int n = 0;
+    int success = 0;
+
+    while (true) {
+        bool heads = problem.f(x); 
+        n++;
+        success += heads;
+
+        // Update log likelihood ratio
+        if (heads) {
+            logLikelihood += mpfr::log(p1 / p0);
+        } else {
+            logLikelihood += mpfr::log((1 - p1) / (1 - p0));
+        }
+
+        if (logLikelihood >= logA) {
+            emp_bias = mpfr::mpreal(success)/n;
+            return 1;
+        } else if (logLikelihood <= logB) {
+            emp_bias = mpfr::mpreal(success)/n;
+            return 0;
+        }
+    }
+}
+
+struct AdaptiveSolver {
+    int solve(Problem & problem, vector<F> pivots, const Answerer &answerer, F eps, int iterations){
+
+		int upper_bound = problem.range().second;
+
+        // the x'th interval corresponds to interval between coins x and x + 1
+		SegTree * tree = new SegTree(0, upper_bound, mpfr::mpreal(1));
+
+        F tau = mpfr::mpreal(".5");
+
+        F temp = mpfr::mpreal(".25");
+        F gamma = 1 - eps*eps*pivots.size();
+        F epsprime = eps;
+
+		for(int i = 0;i < iterations; ++i){
+            vector<int> targets;
+
+            for(F pivot: pivots){
+                int x = tree->find(pivot);
+                F left = pivot - tree->query(0, x-1);
+                F right = tree->query(0, x) - pivot;
+
+                if(left > right){
+                    targets.push_back(x+1);
+                }
+                else{
+                    targets.push_back(x);
+                }
+            }
+
+            vector<int> results(targets.size());
+            vector<F> estimated_biases(targets.size());
+            
+            // will be made parallel
+            #pragma omp parallel for
+            for(int i = 0;i < targets.size(); ++i){
+                int x = targets[i];
+                results[i] = adaptive_flip(tau - eps, tau + eps, tau - epsprime, tau - epsprime, problem, x, estimated_biases[i]); 
+            }
+
+            // compute average bias
+            F average = 0;
+            for(auto bias : estimated_biases){
+                average += mpfr::abs(bias - 1);
+            }
+
+            average /= targets.size();
+
+            // now update results
+            
+            for(int i = 0;i < targets.size(); ++i){
+                int x = targets[i];
+                F left = tree->query(0, x-1);
+                F right = tree->query(x, upper_bound);
+                if (results[i] == 0) {
+                    F lmult = (tau - epsprime)/((tau - epsprime) * left  + (tau + epsprime) * right);
+                    F rmult = (tau + epsprime)/((tau - epsprime) * left  + (tau + epsprime) * right);
+                    tree->mult(0,x-1,lmult);
+                    tree->mult(x,upper_bound,rmult);
+                }
+                else {
+                    F lmult = (tau + epsprime)/((tau + epsprime) * left  + (tau - epsprime) * right);
+                    F rmult = (tau - epsprime)/((tau + epsprime) * left  + (tau - epsprime) * right);
+                    tree->mult(0,x-1,lmult);
+                    tree->mult(x,upper_bound,rmult);
+                }
+            }
+
+			if(mpfr::abs(tree->query(0, upper_bound) - mpfr::mpreal(1)) > .1){
+				printf("BAD\n");
                 exit(0);
 			}
 

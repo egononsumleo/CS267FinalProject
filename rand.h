@@ -43,3 +43,4 @@ bool sprt(double p0, double p1, double alpha, double beta, double true_p) {
         }
     }
 }
+
