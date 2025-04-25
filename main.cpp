@@ -1,7 +1,9 @@
 #include "RBS.h"
+#include <omp.h>
 #include <bits/stdc++.h>
 
-mt19937 generator = mt19937(time(NULL)); // TODO make this random seeded
+mt19937 generator = mt19937(time(NULL)); 
+omp_lock_t twister_lock;
 
 struct StandardInstance : public Problem {
 	uniform_real_distribution<double> distribution = uniform_real_distribution<double>(0,1);
@@ -12,11 +14,14 @@ struct StandardInstance : public Problem {
 	}
 
 	int f(F x) override {
+        omp_set_lock(&twister_lock);
+        double rand = distribution(generator);
+        omp_unset_lock(&twister_lock);
 		if(x <= _answer){ // TODO CHANGE BACK
-			return distribution(generator) <= .5 - eps ? 1 : 0;
+			return rand <= .5 - eps ? 1 : 0;
 		}
 		else{
-			return distribution(generator) <= .5 + eps ? 1 : 0;
+			return rand <= .5 + eps ? 1 : 0;
 		}
 	}
 	pair<int,int> range() const override {
@@ -30,7 +35,7 @@ struct StandardInstance : public Problem {
 int main(){
 	int digits = 128;
 	mpfr::mpreal::set_default_prec(mpfr::digits2bits(digits));
-
+    omp_init_lock(&twister_lock);
     const int procs = 15;
 
 	//vector<Selector*> selectors = {new MedianSelector(), new RandomSelector(), new QSelector()};
@@ -52,7 +57,7 @@ int main(){
 	double eps = .1;
 	//const F PROBLEM_SIZE = mpfr::mpreal(1e10);
 	const int PROBLEM_SIZE = 1000000; 
-	const int M = 400;
+	const int M = 100;
 	int exp_iterations = int(mpfr::log(PROBLEM_SIZE)/(procs*eps*eps));
 
 	cout << exp_iterations << '\n';

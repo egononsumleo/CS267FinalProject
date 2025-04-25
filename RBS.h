@@ -133,6 +133,48 @@ struct Problem {
 	virtual int answer() = 0;
 };
 
+
+bool generate_bernoulli(double p) {
+    static random_device rd;
+    static mt19937 gen(rd());
+    static uniform_real_distribution<> dis(0.0, 1.0);
+    return dis(gen) < p;
+}
+
+void sprt(double p0, double p1, double alpha, double beta, double true_p) {
+    double A = (1 - beta) / alpha;
+    double B = beta / (1 - alpha);
+    double logA = log(A);
+    double logB = log(B);
+
+    double logLikelihood = 0.0;
+    int n = 0;
+    int success = 0;
+
+    while (true) {
+        bool x = generate_bernoulli(true_p);
+        n++;
+        success += x;
+
+        // Update log likelihood ratio
+        if (x) {
+            logLikelihood += log(p1 / p0);
+        } else {
+            logLikelihood += log((1 - p1) / (1 - p0));
+        }
+
+        cout << "n = " << n << ", x = " << x << ", logΛ = " << logLikelihood << endl;
+
+        if (logLikelihood >= logA) {
+            cout << "Accept H1 after " << n << " samples." << endl;
+            break;
+        } else if (logLikelihood <= logB) {
+            cout << "Accept H0 after " << n << " samples." << endl;
+            break;
+        }
+    }
+}
+
 // selects the answer
 struct Answerer {
 	virtual int answer(const vector<F> &pivots, SegTree * tree, Problem & problem) const = 0;
@@ -170,13 +212,14 @@ struct Solver{
                 }
             }
 
-            vector<int> results;
+            vector<int> results(targets.size());
             
             // will be made parallel
-            for(int x: targets){
-                results.push_back(problem.f(x));
+            #pragma omp parallel for
+            for(int i = 0;i < targets.size(); ++i){
+                int x = targets[i];
+                results[i] = problem.f(x);
             }
-
 
             // now update results
             

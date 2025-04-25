@@ -7,8 +7,9 @@ Final Project For CS267
 + Write code to find the optimal query points given epsilon, number of processors
 
 ## TODO
-+ (Luke) Import NBS code from project
-+ Parallelize NBS querying/updates
++ ~~(Luke) Import NBS code from project~~
++ ~~Parallelize NBS querying/updates~~
++ Vary the coin workloads and try different strategies for different workloads
 + Compare vs Naive Baseline
 + Compute Scaling on synthetic data
 
