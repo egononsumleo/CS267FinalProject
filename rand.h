@@ -1,4 +1,10 @@
 #pragma once
+#include <random>
+#include <omp.h>
+using namespace std;
+
+mt19937 generator = mt19937(time(NULL)); 
+omp_lock_t twister_lock;
 
 bool flip_coin(double p) {
     static random_device rd;

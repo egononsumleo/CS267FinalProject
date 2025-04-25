@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <vector>
 #include <random>
+#include "rand.h"
 #include "mpreal.h"
 using namespace std;
 
@@ -134,45 +135,39 @@ struct Problem {
 };
 
 
+struct StandardInstance : public Problem {
+	uniform_real_distribution<double> distribution = uniform_real_distribution<double>(0,1);
+	int N;
+	int _answer;
+	double eps;
+	StandardInstance(int N, int _answer, double eps) : N(N), _answer(_answer), eps(eps){
+	}
+
+	int f(F x) override {
+        omp_set_lock(&twister_lock);
+        double rand = distribution(generator);
+        omp_unset_lock(&twister_lock);
+		if(x <= _answer){ // TODO CHANGE BACK
+			return rand <= .5 - eps ? 1 : 0;
+		}
+		else{
+			return rand <= .5 + eps ? 1 : 0;
+		}
+	}
+	pair<int,int> range() const override {
+		return make_pair(0, N);
+	}
+	int answer(){
+		return _answer;
+	}
+};
+
+
 bool generate_bernoulli(double p) {
     static random_device rd;
     static mt19937 gen(rd());
     static uniform_real_distribution<> dis(0.0, 1.0);
     return dis(gen) < p;
-}
-
-void sprt(double p0, double p1, double alpha, double beta, double true_p) {
-    double A = (1 - beta) / alpha;
-    double B = beta / (1 - alpha);
-    double logA = log(A);
-    double logB = log(B);
-
-    double logLikelihood = 0.0;
-    int n = 0;
-    int success = 0;
-
-    while (true) {
-        bool x = generate_bernoulli(true_p);
-        n++;
-        success += x;
-
-        // Update log likelihood ratio
-        if (x) {
-            logLikelihood += log(p1 / p0);
-        } else {
-            logLikelihood += log((1 - p1) / (1 - p0));
-        }
-
-        cout << "n = " << n << ", x = " << x << ", logΛ = " << logLikelihood << endl;
-
-        if (logLikelihood >= logA) {
-            cout << "Accept H1 after " << n << " samples." << endl;
-            break;
-        } else if (logLikelihood <= logB) {
-            cout << "Accept H0 after " << n << " samples." << endl;
-            break;
-        }
-    }
 }
 
 // selects the answer
