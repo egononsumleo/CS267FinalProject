@@ -31,20 +31,29 @@ int main(){
 	int digits = 128;
 	mpfr::mpreal::set_default_prec(mpfr::digits2bits(digits));
 
+    const int procs = 15;
+
 	//vector<Selector*> selectors = {new MedianSelector(), new RandomSelector(), new QSelector()};
 	MedianAnswerer answerer = MedianAnswerer();
 	Solver solver = Solver();	
 
     vector<vector<F>> strategies;
 
-    strategies.push_back({.4635623083962456, 0.4813945888128402, 0.49837768466777027, 0.5, 0.5016220983878305, 0.5186052643397824, 0.5364373997474698});
-    strategies.push_back({.5,.5,.5,.5,.5,.5,.5});
+    strategies.push_back({0.44682301377817496, 0.4637143400093893, 0.47962723802743534, 0.4813562690251669, 0.48155226575351157, 0.49745287158137996, 0.49998999567787655, 0.49999999567787656, 0.5000099956778765, 0.5025473812353886, 0.5184477001077291, 0.5186435931686747, 0.5203731243436185, 0.536285815232788, 0.553177278919289});
+
+    // median strat
+    vector<F> median;
+    for(int i = 0;i < 15; ++i){
+        median.push_back(.5);
+    }
+
+    strategies.push_back(median);
 
 	double eps = .1;
 	//const F PROBLEM_SIZE = mpfr::mpreal(1e10);
-	const int PROBLEM_SIZE = 100000; 
-	const int M = 100;
-	int exp_iterations = int(mpfr::log(PROBLEM_SIZE)/(6*eps*eps));
+	const int PROBLEM_SIZE = 1000000; 
+	const int M = 400;
+	int exp_iterations = int(mpfr::log(PROBLEM_SIZE)/(procs*eps*eps));
 
 	cout << exp_iterations << '\n';
 
