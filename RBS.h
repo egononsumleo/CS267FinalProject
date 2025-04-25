@@ -159,7 +159,7 @@ struct Solver{
 
             for(F pivot: pivots){
                 int x = tree->find(pivot);
-                F left = pivot - tree->query(0, x);
+                F left = pivot - tree->query(0, x-1);
                 F right = tree->query(0, x) - pivot;
 
                 if(left > right){

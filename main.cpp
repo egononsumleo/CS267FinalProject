@@ -44,7 +44,7 @@ int main(){
 	//const F PROBLEM_SIZE = mpfr::mpreal(1e10);
 	const int PROBLEM_SIZE = 100000; 
 	const int M = 100;
-	int exp_iterations = int(mpfr::log(PROBLEM_SIZE)/(2*eps*eps));
+	int exp_iterations = int(mpfr::log(PROBLEM_SIZE)/(6*eps*eps));
 
 	cout << exp_iterations << '\n';
 
