@@ -114,6 +114,8 @@ struct SegTree {
             build();
         }
     }
+
+
 };
 
 // selects the pivot
@@ -210,7 +212,7 @@ struct Solver {
             vector<int> results(targets.size());
             
             // will be made parallel
-            #pragma omp parallel for
+            //#pragma omp parallel for
             for(int i = 0;i < targets.size(); ++i){
                 int x = targets[i];
                 results[i] = problem.f(x);
@@ -317,7 +319,7 @@ struct AdaptiveSolver {
             vector<F> estimated_biases(targets.size());
             
             // will be made parallel
-            #pragma omp parallel for
+            //#pragma omp parallel for
             for(int i = 0;i < targets.size(); ++i){
                 int x = targets[i];
                 results[i] = adaptive_flip(tau - eps, tau + eps, tau - epsprime, tau - epsprime, problem, x, estimated_biases[i]); 
