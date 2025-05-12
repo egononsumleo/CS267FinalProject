@@ -25,7 +25,7 @@ struct SegTree {
     int arg_max;
     
     SegTree(int _l, int _r, F _value) : l(_l), r(_r), value(_value), delayed(mpfr::mpreal(1)) {
-        max_value = mpfr::mpreal(1)/(r - l + 1);
+        max_value = _value/(r - l + 1);
         arg_max = _l;
         left = right = nullptr;
     } 
@@ -108,12 +108,12 @@ struct SegTree {
     void build(){
         if(right != nullptr && left != nullptr){
             value = right->value + left->value;
-            if(right->value > left->value) {
-                max_value = right->value;
+            if(right->max_value > left->max_value) {
+                max_value = right->max_value;
                 arg_max = right->arg_max;
             }
             else {
-                max_value = left->value;
+                max_value = left->max_value;
                 arg_max = left->arg_max;
             }
         }
@@ -213,7 +213,7 @@ struct Solver {
 
         // the x'th interval corresponds to interval between coins x and x + 1
 		SegTree * tree = new SegTree(0, upper_bound, mpfr::mpreal(1));
-        std::cout << " Tree initial max_value " << tree->get_max_value() << '\n';
+        //std::cout << " Tree initial max_value " << tree->get_max_value() << '\n';
 
         F tau = mpfr::mpreal(".5");
 
@@ -274,7 +274,7 @@ struct Solver {
 	
 		//int ans = answerer.answer(pivots, tree, problem);
         int ans = tree->get_max_ans();
-        std::cout << tree->get_max_value() << ' ' << iterations << '\n';
+        //std::cout << tree->get_max_value() << ' ' << iterations << '\n';
 
 		delete tree;
 
