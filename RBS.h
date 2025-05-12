@@ -20,8 +20,13 @@ struct SegTree {
     SegTree * left = nullptr; 
     SegTree * right = nullptr;
     F value, delayed;
+
+    F max_value;
+    int arg_max;
     
     SegTree(int _l, int _r, F _value) : l(_l), r(_r), value(_value), delayed(mpfr::mpreal(1)) {
+        max_value = mpfr::mpreal(1)/(r - l + 1);
+        arg_max = _l;
         left = right = nullptr;
     } 
 
@@ -45,6 +50,14 @@ struct SegTree {
         }
     }
 
+    F get_max_value(){
+        return max_value;
+    }
+
+    int get_max_ans(){
+        return arg_max;
+    }
+
     int mid(){
         return (l + r)/2;
     }
@@ -52,6 +65,7 @@ struct SegTree {
     void apply(F x){
         value *= x;
         delayed *= x;
+        max_value *= x;
     }
 
     void push(){
@@ -87,12 +101,21 @@ struct SegTree {
         if(left->value >= p){
             return left->find(p);
         }
+
         return right->find(p - left->value);
     }
 
     void build(){
         if(right != nullptr && left != nullptr){
             value = right->value + left->value;
+            if(right->value > left->value) {
+                max_value = right->value;
+                arg_max = right->arg_max;
+            }
+            else {
+                max_value = left->value;
+                arg_max = left->arg_max;
+            }
         }
     }
 
@@ -201,10 +224,10 @@ struct Solver {
                 F left = pivot - tree->query(0, x-1);
                 F right = tree->query(0, x) - pivot;
 
-                if(left > right){
+                if(left > right) {
                     targets.push_back(x+1);
                 }
-                else{
+                else {
                     targets.push_back(x);
                 }
             }
@@ -212,7 +235,7 @@ struct Solver {
             vector<int> results(targets.size());
             
             // will be made parallel
-            //#pragma omp parallel for
+            // #pragma omp parallel for
             for(int i = 0;i < targets.size(); ++i){
                 int x = targets[i];
                 results[i] = problem.f(x);
@@ -361,6 +384,7 @@ struct AdaptiveSolver {
 		}
 	
 		int ans = answerer.answer(pivots, tree, problem);
+        std::cout << tree->arg_max << ' ' << ans << '\n';
 
 		delete tree;
 
