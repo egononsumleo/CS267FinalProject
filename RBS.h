@@ -207,16 +207,20 @@ struct MedianAnswerer : public Answerer {
 };
 
 struct Solver {
-    int solve(Problem & problem, vector<F> pivots, const Answerer &answerer, F eps, int iterations){
+    int solve(Problem & problem, vector<F> pivots, const Answerer &answerer, F eps, F delta, int &iterations){
 
 		int upper_bound = problem.range().second;
 
         // the x'th interval corresponds to interval between coins x and x + 1
 		SegTree * tree = new SegTree(0, upper_bound, mpfr::mpreal(1));
+        std::cout << " Tree initial max_value " << tree->get_max_value() << '\n';
 
         F tau = mpfr::mpreal(".5");
 
-		for(int i = 0;i < iterations; ++i){
+        iterations = 0;
+
+        while(delta <= (mpfr::mpreal(1) - tree->get_max_value())/tree->get_max_value()) {
+            iterations++;
             vector<int> targets;
 
             for(F pivot: pivots){
@@ -268,7 +272,9 @@ struct Solver {
 
 		}
 	
-		int ans = answerer.answer(pivots, tree, problem);
+		//int ans = answerer.answer(pivots, tree, problem);
+        int ans = tree->get_max_ans();
+        std::cout << tree->get_max_value() << ' ' << iterations << '\n';
 
 		delete tree;
 
@@ -384,7 +390,7 @@ struct AdaptiveSolver {
 		}
 	
 		int ans = answerer.answer(pivots, tree, problem);
-        std::cout << tree->arg_max << ' ' << ans << '\n';
+        //std::cout << tree->arg_max << ' ' << ans << '\n';
 
 		delete tree;
 
