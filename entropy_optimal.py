@@ -5,7 +5,7 @@ import random
 from scipy.optimize import minimize
 
 EPS = 0.125 # The epsilon from NBS
-procs = 10 # Number of processors.
+procs = 7 # Number of processors.
 precision = 20 # The number of binary digits after the decimal point base 2 for gradient descent to be accurate on.
 
 # Heads (True) suggests that the answer is to the left
@@ -55,7 +55,7 @@ def grad_desc(init_guess, accuracy, procs):
     got_smaller = True
     while got_smaller:
 
-        print(cur_guess)
+        # print(cur_guess)
 
         got_smaller = False
         for i in range(procs):

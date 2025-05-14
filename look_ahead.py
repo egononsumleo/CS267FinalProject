@@ -4,7 +4,7 @@ import numpy as np
 from scipy.optimize import minimize
 
 EPS = 0.1 # The epsilon from NBS
-depth = 3 # The number of steps to look ahead
+depth = 1 # The number of steps to look ahead
 procs = 2**depth - 1 # Number of processors. This is never used.
 precision = 400 # The number of binary digits after the decimal point base 2 for gradient descent to be accurate on.
 
