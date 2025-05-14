@@ -1,11 +1,9 @@
 #include "RBS.h"
-#include <omp.h>
-#include <bits/stdc++.h>
+#include "stdc++.h"
 
 int main(){
 	int digits = 128;
 	mpfr::mpreal::set_default_prec(mpfr::digits2bits(digits));
-    omp_init_lock(&twister_lock);
     const int procs = 63;
 
 	//vector<Selector*> selectors = {new MedianSelector(), new RandomSelector(), new QSelector()};
@@ -49,6 +47,7 @@ int main(){
 
     for(int strat = 0; strat < strategies.size(); ++strat){
         for(int i = exp_iterations;i <= exp_iterations; ++i){
+            cout << "i is" << i << endl;
             vector<F> v_correct;
             auto pivots = strategies[strat];
 

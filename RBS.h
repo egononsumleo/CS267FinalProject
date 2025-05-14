@@ -169,9 +169,7 @@ struct StandardInstance : public Problem {
 	}
 
 	int f(F x) override {
-        omp_set_lock(&twister_lock);
         double rand = distribution(generator);
-        omp_unset_lock(&twister_lock);
 		if(x <= _answer){ // TODO CHANGE BACK
 			return rand <= .5 - eps ? 1 : 0;
 		}
