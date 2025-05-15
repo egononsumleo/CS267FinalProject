@@ -38,7 +38,7 @@ int main(){
     /* 2. Equal Splitting strategy */
     vector<F> equal;
     for(int i = 0;i < procs; ++i){
-        equal.push_back(float(i+1)/procs);
+        equal.push_back(float(i+1)/(procs+1));
     }
     strategies.push_back(equal);
     strategy_name.push_back("Equal splitting");
